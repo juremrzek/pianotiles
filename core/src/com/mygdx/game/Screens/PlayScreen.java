@@ -3,6 +3,7 @@ package com.mygdx.game.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -32,6 +33,8 @@ public class PlayScreen extends InputAdapter implements Screen {
     private SpriteBatch batch;
     private BitmapFont font;
 
+    private Music music;
+
     public PlayScreen(MyGame game, SpriteBatch batch){
         this.game = game;
         this.batch = batch;
@@ -48,13 +51,16 @@ public class PlayScreen extends InputAdapter implements Screen {
         //how many notes are at once in array
         int noteCount = 10;
         notes = new Array<>();
-        scrollSpeed = 1000;
+        //scrollSpeed = 1000;
         NOTE_WIDTH = viewport.getWorldWidth()/4;
         Gdx.input.setInputProcessor(this);
         pointerIn3D = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
         viewport.unproject(pointerIn3D);
         pointer = new Vector2(pointerIn3D.x, pointerIn3D.y);
         gameStarted = false;
+
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/Fractured_fairytale.mp3")); //length: "224s"
+        scrollSpeed = NOTE_HEIGHT * (120f/60); //duration of a beat - bpm/minute
 
         for(int i = 0; i< noteCount; i++){
             int notePosition;
@@ -115,7 +121,6 @@ public class PlayScreen extends InputAdapter implements Screen {
     public void update(float dt){
         for(int i=0; i<notes.size; i++) {
             Note n = notes.get(i);
-            scrollSpeed += dt;
             if(n.getY()<-NOTE_HEIGHT){
                 if(n.isClicked()) {
                     notes.removeIndex(i);
@@ -158,6 +163,8 @@ public class PlayScreen extends InputAdapter implements Screen {
 
     @Override
     public void dispose() {
+        music.stop();
+        music.dispose();
         font.dispose();
         sr.dispose();
     }
@@ -182,7 +189,7 @@ public class PlayScreen extends InputAdapter implements Screen {
         this.pointer.y = pointerIn3D.y;
         boolean isAnyClicked = false;
         if(gameStarted) {
-            for (Note n : notes) {
+            for (Note n:notes) {
                 if (n.contains(this.pointer.x, this.pointer.y)) {
                     n.setClicked(true);
                     isAnyClicked = true;
@@ -194,6 +201,7 @@ public class PlayScreen extends InputAdapter implements Screen {
             }
         }
         else if (notes.get(0).contains(this.pointer.x, this.pointer.y)) {
+            music.play();
             gameStarted = true;
             notes.get(0).setClicked(true);
         }
