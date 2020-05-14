@@ -1,7 +1,6 @@
 package com.mygdx.game.Objects;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.game.Screens.PlayScreen;
 
 public class Note {
     private int id;
